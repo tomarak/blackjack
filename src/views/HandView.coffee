@@ -5,7 +5,12 @@ class window.HandView extends Backbone.View
 
   initialize: ->
     @collection.on 'add remove change', => @render()
+    @collection.on 'youLose', => @youLose()
     @render()
+
+
+  youLose: ->
+    @$('.score').text 'LOSE'
 
   render: ->
     @$el.children().detach()

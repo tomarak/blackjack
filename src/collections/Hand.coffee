@@ -4,7 +4,7 @@ class window.Hand extends Backbone.Collection
   initialize: (array, deck, isDealer) ->
     @flippedCard = array[0]
     @CardsAtHand = array
-    @isDealer = isDealer
+    @isDealer = isDealer || false
     @deck = deck
     @isStanding = false
     if !isDealer
@@ -12,8 +12,9 @@ class window.Hand extends Backbone.Collection
     else @isPlaying = false
 
   hit: ->
-    if @isPlaying and !@isStanding
-      @add(@deck.pop());
+    if @isPlaying and !@isStanding and @minScore() < 21
+      @add(@deck.pop())
+      @checkScore()
 
 
   hasAce: -> @reduce (memo, card) ->
@@ -31,17 +32,28 @@ class window.Hand extends Backbone.Collection
     [@minScore(), @minScore() + 10 * @hasAce()]
 
   stand: ->
-    if @isDealer
-      @flippedCard = @flippedCard.flip()
-      @dealerHit()
     if !@isDealer
       @isPlaying = false
-      @trigger('PlayerFinished', @);
+      @trigger('playerFinished', @)
       @isStanding = true
 
   dealerHit: ->
-    while @scores < 21
+    while @minScore() < 17
       @hit()
+    @trigger('declareWinner', @minScore(), @)
+
+  startPlaying: ->
+    if @isDealer
+      @flippedCard = @flippedCard.flip()
+      @isPlaying = true;
+      @dealerHit()
+
+  checkScore: ->
+    if @minScore() == 21 && !@isDealer
+      @stand()
+    if @minScore() > 21 && !@isDealer
+      @trigger('playerLoses', @)
+
 
 
 

@@ -5,10 +5,28 @@ class window.App extends Backbone.Model
     @set 'deck', deck = new Deck()
     @set 'playerHand', deck.dealPlayer()
     @set 'dealerHand', deck.dealDealer()
-    @on 'PlayerFinished': ->
-      @get('
+    `this.get('playerHand').on('playerFinished', function() {
+      this.get('dealerHand').startPlaying();
+    },this);`
 
-        dealerHand')
+    `this.get('dealerHand').on('declareWinner', function(dealerScore) {
+
+      var playerScore = this.get('playerHand').minScore();
+      if (dealerScore > 21 || playerScore > dealerScore)
+        this.trigger('playerWins', 'playerWins', this);
+
+      else if (playerScore < dealerScore)
+        this.trigger('dealerWins', 'dealerWins', this);
+
+      else this.trigger('push', 'push', this);
+
+    }, this);`
+
+    `this.get('playerHand').on('playerLoses', function() {
+      this.trigger('dealerWins', 'dealerWins', this);
+      }
+    , this);`
+
 
 
   stand: ->
